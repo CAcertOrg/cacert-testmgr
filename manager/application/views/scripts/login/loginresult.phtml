@@ -1,0 +1,16 @@
+<?php
+/**
+ * @author markus
+ * $Id: loginresult.phtml 7 2009-11-19 15:03:59Z markus $
+ */
+
+if ($this->session->authdata['authed']) {
+?>
+<H1>Willkommen im Club, <?php  print $this->session->authdata['authed_username']; ?></H1>
+<?php
+}
+else {
+?>
+<H1>Bitte loggen Sie sich ein.</H1>
+<?php
+}

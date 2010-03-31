@@ -1,0 +1,123 @@
+@CHARSET "UTF-8";
+
+html {
+	font-family: sans-serif;
+	background-color: #cccccc;
+	color: #333333;
+	overflow: scroll;
+}
+
+#center {
+	position: absolute;
+	width: 1000px;
+	left: 50%;
+	margin-left: -500px;
+}
+
+#header {
+	background-color: #F5F7F7;
+	width: 99%;
+	height: 30px;
+	top: 0px;
+	left: 0px;
+	position: absolute;
+	padding: 3px;
+	margin: 3px;
+}
+
+#header-logo {
+	float: left;
+	color: #FFFFFF;
+}
+
+#header-navigation {
+	float: right;
+}
+
+#header-navigation ul {
+	list-style-type: none;
+	padding: 0px;
+	margin: 0px;
+	font-size: 1.2em;
+}
+
+#header-navigation ul li {
+	padding-left: 5px;
+	margin-left: 5px;
+	display: inline;
+}
+
+#header-navigation ul li a {
+	text-decoration: none;
+	color: #000000;
+}
+
+#header-navigation ul li a:hover {
+	color: #777777;
+}
+
+#header-navigation ul li a.active {
+	color: #505090;
+}
+
+#left-navigation {
+	background-color: #F5F7F7;
+	width: 180px;
+	height: 600px;
+	left: 0px;
+	top: 36px;
+	position: absolute;
+	padding: 3px; 
+	margin: 3px;
+}
+
+#left-navigation ul {
+	list-style-type: none;
+	padding: 0px;
+	margin: 0px;
+	font-size: 1.2em;
+}
+
+#left-navigation ul li {
+	padding-left: 5px;
+	margin-left: 5px;
+	display: block;
+}
+
+#left-navigation ul li a {
+	text-decoration: none;
+	color: #000000;
+}
+
+#left-navigation ul li a:hover {
+	color: #777777;
+}
+
+#left-navigation ul li a.active {
+	color: #770000;
+}
+
+#content {
+	left: 186px;
+	top: 36px;
+	width: 800px;
+	position: absolute;
+	padding: 5px;
+	margin: 3px;
+	background-color: #FFFFFF;
+}
+
+#userinfo {
+	right: 5px;
+	bottom: 5px;
+	position: absolute;
+	padding: 3px;
+	margin: 3px;
+	background-color: #DDDDAA;
+	font-size: 0.8em;
+}
+
+#content .error {
+	color: #F80808;
+	font-weight: bold;
+}

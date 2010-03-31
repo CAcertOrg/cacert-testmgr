@@ -1,0 +1,16 @@
+<?php
+/**
+ * @author markus
+ * $Id: index.phtml 36 2009-12-15 15:49:57Z markus $
+ */
+
+// $this->headScript()->appendFile('js/1st.js');
+// $this->headScript()->appendFile('js/2nd.js');
+$this->headLink()->appendStylesheet('/css/login.css');
+
+$this->headLink()->appendStylesheet('/css/form_dl.css');
+?>
+
+<H1><?php print I18n::_('Please log in'); ?></H1>
+<?php print $this->form;?>
+<a href='/login/crt'><?php print I18n::_('Client Cert Login'); ?></a>

@@ -1,0 +1,11 @@
+@CHARSET "UTF-8";
+
+#content a {
+	text-decoration: none;
+	color: #000000;
+	font-size: 1.2em;
+}
+
+#content a:hover {
+	color: #777777;
+}

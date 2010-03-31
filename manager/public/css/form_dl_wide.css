@@ -1,0 +1,24 @@
+@CHARSET "UTF-8";
+
+#content dl.zend_form label.required {
+	color: #000000;
+	font-weight: bold;
+}
+
+#content dl.zend_form {
+	display: block;
+	font-size: 0.8em;
+}
+
+#content dl.zend_form dt {
+	display: block;
+	float: left;
+	width: 350px;
+	margin: 10px;
+}
+
+#content dl.zend_form dd {
+	display: block;
+	clear: right;
+	padding: 10px;
+}
