@@ -1,0 +1,178 @@
+-- MySQL dump 10.11
+--
+-- Host: localhost    Database: ca_mgr
+-- ------------------------------------------------------
+-- Server version	5.0.51a-24+lenny2-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `front_session`
+--
+
+DROP TABLE IF EXISTS `front_session`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `front_session` (
+  `id` char(32) collate utf8_unicode_ci NOT NULL default '',
+  `modified` int(11) default NULL,
+  `lifetime` int(11) default NULL,
+  `data` text collate utf8_unicode_ci,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `front_session`
+--
+
+LOCK TABLES `front_session` WRITE;
+/*!40000 ALTER TABLE `front_session` DISABLE KEYS */;
+/*!40000 ALTER TABLE `front_session` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `system_config`
+--
+
+DROP TABLE IF EXISTS `system_config`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `system_config` (
+  `id` bigint(20) NOT NULL auto_increment,
+  `config_key` varchar(128) collate utf8_unicode_ci NOT NULL,
+  `config_value` varchar(255) collate utf8_unicode_ci NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=619 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `system_config`
+--
+
+LOCK TABLES `system_config` WRITE;
+/*!40000 ALTER TABLE `system_config` DISABLE KEYS */;
+INSERT INTO `system_config` VALUES (588,'log.file.name','/tmp/ca_mgr.log'),(589,'log.file.enabled','0'),(590,'log.syslog.facility','128'),(591,'log.syslog.enabled','1'),(592,'log.priority','7');
+/*!40000 ALTER TABLE `system_config` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `system_resource`
+--
+
+DROP TABLE IF EXISTS `system_resource`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `system_resource` (
+  `id` bigint(20) NOT NULL auto_increment,
+  `resource` varchar(45) collate utf8_unicode_ci NOT NULL COMMENT 'Name of the resource',
+  `inherit_resource` varchar(45) collate utf8_unicode_ci default NULL COMMENT 'Resource inherits from another resource',
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='resources to which access can be granted (see system_roles)';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `system_resource`
+--
+
+LOCK TABLES `system_resource` WRITE;
+/*!40000 ALTER TABLE `system_resource` DISABLE KEYS */;
+/*!40000 ALTER TABLE `system_resource` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `system_role`
+--
+
+DROP TABLE IF EXISTS `system_role`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `system_role` (
+  `id` bigint(20) NOT NULL auto_increment,
+  `role` varchar(45) collate utf8_unicode_ci NOT NULL COMMENT 'Name of an role, these roles can then be assigned to users.',
+  `inherit_role` varchar(45) collate utf8_unicode_ci default NULL COMMENT 'Role inherits from another role',
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Define the roles, never assign permissions directly';
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `system_role`
+--
+
+LOCK TABLES `system_role` WRITE;
+/*!40000 ALTER TABLE `system_role` DISABLE KEYS */;
+INSERT INTO `system_role` VALUES (1,'User',''),(2,'Admin','User');
+/*!40000 ALTER TABLE `system_role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `system_role_has_system_resource`
+--
+
+DROP TABLE IF EXISTS `system_role_has_system_resource`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `system_role_has_system_resource` (
+  `system_role_id` bigint(20) NOT NULL,
+  `system_resource_id` bigint(20) NOT NULL,
+  `priority` int(10) unsigned NOT NULL default '1' COMMENT 'Allow and deny statements can be piled, which makes the order of statements important.',
+  `permission` enum('allow','deny') collate utf8_unicode_ci NOT NULL default 'allow' COMMENT 'Grant permission or deny, defaults to grant',
+  `privilege` set('view','edit','administrate') collate utf8_unicode_ci NOT NULL default 'view' COMMENT 'Privilege to grant or deny',
+  PRIMARY KEY  (`system_role_id`,`system_resource_id`),
+  KEY `fk_system_role_has_system_resource_system_role1` (`system_role_id`),
+  KEY `fk_system_role_has_system_resource_system_resource1` (`system_resource_id`),
+  CONSTRAINT `fk_system_role_has_system_resource_system_resource1` FOREIGN KEY (`system_resource_id`) REFERENCES `system_resource` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_system_role_has_system_resource_system_role1` FOREIGN KEY (`system_role_id`) REFERENCES `system_role` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `system_role_has_system_resource`
+--
+
+LOCK TABLES `system_role_has_system_resource` WRITE;
+/*!40000 ALTER TABLE `system_role_has_system_resource` DISABLE KEYS */;
+/*!40000 ALTER TABLE `system_role_has_system_resource` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `system_user`
+--
+
+DROP TABLE IF EXISTS `system_user`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `system_user` (
+  `id` bigint(20) NOT NULL auto_increment,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Dumping data for table `system_user`
+--
+
+LOCK TABLES `system_user` WRITE;
+/*!40000 ALTER TABLE `system_user` DISABLE KEYS */;
+/*!40000 ALTER TABLE `system_user` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2010-04-13 10:51:41
