@@ -16,9 +16,35 @@ class MailController extends Zend_Controller_Action
 
     public function indexAction()
     {
-        // action body
+    	$config = Zend_Registry::get('config');
+		$imap_config = $config->imap;
+        $imap = imapConnection::getInstance('cacert', $imap_config);
+		$imap->imapSwitchMbox('INBOX');
+
+        $ck = $imap->imapCheck();
+
+        $headers = array();
+        for ($i=0; $i < $ck->Nmsgs; $i++) {
+        	$header = $imap->imapHeader($i+1);
+        	$header->uid = $imap->imapUID($i+1);
+        	$header->detailslink = $this->view->url(array('controller' => 'mail', 'action' => 'read', 'uid' => $header->uid), 'default', true);
+        	$headers[] = $header;
+        }
+
+        $this->view->headers = $headers;
     }
 
+    public function readAction()
+    {
+    	$config = Zend_Registry::get('config');
+		$imap_config = $config->imap;
+        $imap = imapConnection::getInstance('cacert', $imap_config);
+		$imap->imapSwitchMbox('INBOX');
 
+		$uid = $this->getRequest()->getParam('uid');
+
+		$body = $imap->imapBodyByUID($uid);
+
+		$this->view->mail_body = $body;
+    }
 }
-

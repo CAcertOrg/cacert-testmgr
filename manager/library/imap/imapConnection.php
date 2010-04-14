@@ -407,8 +407,8 @@ class imapConnection {
         if ($ret === false) {
             if ($reconnect === true) {
 				$this->imap = $this->imapOpen($this->server.$this->mbox,
-					$this->config->getValue('username'),
-					$this->config->getValue('password'),
+					$this->config->username,
+					$this->config->password,
 					OP_HALFOPEN);
 
                 $ret = imap_ping($this->imap);
@@ -471,26 +471,26 @@ class imapConnection {
 	 * @param $instanceName
 	 * @param $config
 	 */
-	protected function __construct($instanceName,$config) {
+	protected function __construct($instanceName, $config) {
 		$this->instanceName = $instanceName;
 		$this->config = $config;
 
-		if (!$this->config->hasValue('mailhost')) {
+		if (!isset($this->config->mailhost)) {
 			throw new IMAPException(__METHOD__ . ' config attribute missing: "mailhost"');
 		}
-		if (!$this->config->hasValue('username')) {
+		if (!isset($this->config->username)) {
 			throw new IMAPException(__METHOD__ . ' config attribute missing: "username"');
 		}
-		if (!$this->config->hasValue('password')) {
+		if (!isset($this->config->password)) {
 			throw new IMAPException(__METHOD__ . ' config attribute missing: "password"');
 		}
-		if (!$this->config->hasValue('port')) {
+		if (!isset($this->config->port)) {
 			throw new IMAPException(__METHOD__ . ' config attribute missing: "port"');
 		}
 
-		$this->server = '{'.$this->config->getValue('mailhost').':'.$this->config->getValue('port').'/imap';
-		if( $this->config->hasValue('use_tls') &&
-			$this->config->getValue('use_tls') == true ) {
+		$this->server = '{'.$this->config->mailhost.':'.$this->config->port.'/imap';
+		if( isset($this->config->use_tls) &&
+			$this->config->use_tls != 0 ) {
 			$this->server .= '/tls';
 		}
 		$this->server .= '/novalidate-cert}';
@@ -502,8 +502,8 @@ class imapConnection {
 		$this->imap = null;
 
 		$this->imap = $this->imapOpen($this->server.$mbox,
-			$this->config->getValue('username'),
-			$this->config->getValue('password'),
+			$this->config->username,
+			$this->config->password,
 			OP_HALFOPEN);
 
 		if ($this->imap === false) {
@@ -535,9 +535,11 @@ class imapConnection {
 				return $instance;
 		}
 
+		/*
 		if (!$config instanceof Config) {
 			throw new IMAPException(__METHOD__ . ' no config');
 		}
+		*/
 
 		$object = new imapConnection($instanceName, $config);
 

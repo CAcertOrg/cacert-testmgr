@@ -3,5 +3,26 @@
  * @author markus
  * $Id: index.phtml 25 2009-12-02 15:43:21Z markus $
  */
+$this->headLink()->appendStylesheet('/css/mail.css');
 ?>
 <H1><?php print I18n::_('Mail'); ?></H1>
+<table>
+	<tr>
+		<th><?php print I18n::_('From');?></th>
+		<th><?php print I18n::_('To');?></th>
+		<th><?php print I18n::_('Subject');?></th>
+		<th><?php print I18n::_('Date');?></th>
+		<th><?php print I18n::_('Size');?></th>
+	</tr>
+<?php
+foreach ($this->headers as $header) {
+	print "        <tr>\n";
+	print "            <td><a href=\"" . $header->detailslink . "\">" . $header->fromaddress . "</a></td>";
+	print "            <td>" . $header->toaddress . "</td>";
+	print "            <td>" . $header->subject . "</td>";
+	print "            <td>" . $header->date . "</td>";
+	print "            <td>" . $header->Size . "</td>";
+	print "        </tr>\n";
+}
+?>
+</table>

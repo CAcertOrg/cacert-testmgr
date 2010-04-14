@@ -1,0 +1,10 @@
+<?php
+/**
+ * @author markus
+ * $Id: index.phtml 25 2009-12-02 15:43:21Z markus $
+ */
+$this->headLink()->appendStylesheet('/css/mail.css');
+?>
+<H1><?php print I18n::_('Read Mail'); ?></H1>
+<?php
+print_r($this->mail_body);

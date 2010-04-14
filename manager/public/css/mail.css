@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+
+#content table {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+
+#content th {
+	border: 1px solid black;
+	padding: 3px;
+}
+
+#content td {
+	border: 1px solid black;
+	padding: 3px;
+}
+
+#content a {
+	text-decoration: none;
+	color: #000000;
+}
+
+#content a:hover {
+	color: #777777;
+}
