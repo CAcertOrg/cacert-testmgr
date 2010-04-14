@@ -12,6 +12,12 @@ class LoginController extends Zend_Controller_Action
 
     public function init() {
         /* Initialize action controller here */
+    	$config = new Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini', APPLICATION_ENV);
+
+    	$db = Zend_Db::factory($config->ca_mgr->db->auth->pdo, $config->ca_mgr->db->auth);
+		Zend_Registry::set('auth_dbc', $db);
+    	$db2 = Zend_Db::factory($config->ca_mgr->db->auth2->pdo, $config->ca_mgr->db->auth2);
+		Zend_Registry::set('auth2_dbc', $db2);
     }
 
     public function indexAction() {
@@ -24,10 +30,8 @@ class LoginController extends Zend_Controller_Action
     	if ($form->isValid($_POST)) {
 	    	$config = new Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini', APPLICATION_ENV);
 
-	    	$db = Zend_Db::factory($config->ca_mgr->db->auth->pdo, $config->ca_mgr->db->auth);
-			Zend_Registry::set('auth_dbc', $db);
-	    	$db2 = Zend_Db::factory($config->ca_mgr->db->auth2->pdo, $config->ca_mgr->db->auth2);
-			Zend_Registry::set('auth2_dbc', $db2);
+			$db = Zend_Registry::get('auth_dbc');
+			$db2 = Zend_Registry::get('auth2_dbc');
 
 	    	$auth = new Zend_Auth_Adapter_DbTable($db);
 
@@ -86,14 +90,12 @@ class LoginController extends Zend_Controller_Action
 
     	$config = new Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini', APPLICATION_ENV);
 
-    	$db = Zend_Db::factory($config->ca_mgr->db->auth->pdo, $config->ca_mgr->db->auth);
-		Zend_Registry::set('auth_dbc', $db);
-	   	$db2 = Zend_Db::factory($config->ca_mgr->db->auth2->pdo, $config->ca_mgr->db->auth2);
-		Zend_Registry::set('auth2_dbc', $db2);
+		$db = Zend_Registry::get('auth_dbc');
+		$db2 = Zend_Registry::get('auth2_dbc');
 
-    	$auth = new Zend_Auth_Adapter_DbTable($db);
+    	$auth = new Zend_Auth_Adapter_DbTable($db2);
 
-    	$auth->setTableName($config->ca_mgr->db->auth->tablename)
+    	$auth->setTableName($config->ca_mgr->db->auth2->tablename)
     		 ->setIdentityColumn('user_client_crt_s_dn_i_dn')
     		 ->setCredentialColumn('user_client_crt_s_dn_i_dn');
 
@@ -143,27 +145,51 @@ class LoginController extends Zend_Controller_Action
    	protected function getAuthDetailsIntoSession($auth, $crt) {
    		$session = Zend_Registry::get('session');
 
+   		$db  = Zend_Registry::get('auth_dbc');
+		$db2 = Zend_Registry::get('auth2_dbc');
+
    		/**
    		 * non existent in our case, look up a 2nd table (ca_mgr.system_user by login name (email)) and
    		 * get id from there, defaulting to User (1) when no db entry exists
    		 */
     	$auth_res = $auth->getResultRowObject();
-		$system_roles_id = 1;
+
+    	if (!isset($auth_res->system_role_id) || $auth_res->system_role_id == 0) {
+	    	$res = $db2->query('select * from system_user where login=?', array($auth_res->email));
+			if ($res->rowCount() > 0) {
+	    		$res_ar = $res->fetch();
+	    		$system_roles_id = $res_ar['system_role_id'];
+			}
+	    	else {
+	    		// no extra user info in manager database, assume standard user
+	    		$system_roles_id = 1;
+	    	}
+    	}
+		else
+			$system_roles_id = $auth_res->system_role_id;
 
    		$session->authdata['authed'] = true;
     	$session->authdata['authed_id'] = $auth_res->id;
-    	$session->authdata['authed_username'] = $auth_res->email;
-    	$session->authdata['authed_fname'] = $auth_res->fname;
-    	$session->authdata['authed_lname'] = $auth_res->lname;
+		if (!isset($auth_res->fname) || !isset($auth_res->lname)) {
+			$res = $db->query('select * from users where email=?', array($auth_res->login));
+			$res_ar = $res->fetch();
+			$session->authdata['authed_username'] = 'crt' . $res_ar['login'];
+			$session->authdata['authed_fname'] = $res_ar['fname'];
+			$session->authdata['authed_lname'] = $res_ar['lname'];
+		}
+		else  {
+		    $session->authdata['authed_username'] = $auth_res->email;
+		    $session->authdata['authed_fname'] = $auth_res->fname;
+		    $session->authdata['authed_lname'] = $auth_res->lname;
+		}
 		$session->authdata['authed_by_crt'] = $crt;
 		$session->authdata['authed_by_cli'] = true;
 
-    	$db = Zend_Registry::get('auth2_dbc');
-		$res = $db->query('select * from system_role where id=?', array($system_roles_id));
+		$res = $db2->query('select * from system_role where id=?', array($system_roles_id));
 		$res_ar = $res->fetch();
     	$session->authdata['authed_role'] = $res_ar['role'];
 
-    	$acl = $this->makeAcl($db);
+    	$acl = $this->makeAcl($db2);
 
     	$session->authdata['authed_permissions'] = $acl;
 

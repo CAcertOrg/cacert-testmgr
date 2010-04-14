@@ -153,8 +153,12 @@ SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
 CREATE TABLE `system_user` (
   `id` bigint(20) NOT NULL auto_increment,
-  PRIMARY KEY  (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `system_role_id` bigint(20) NOT NULL,
+  `login` varchar(255) collate utf8_unicode_ci NOT NULL default '',
+  PRIMARY KEY  (`id`),
+  KEY `fk_system_user_system_role1` (`system_role_id`),
+  CONSTRAINT `fk_system_user_system_role1` FOREIGN KEY (`system_role_id`) REFERENCES `system_role` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 SET character_set_client = @saved_cs_client;
 
 --
