@@ -17,9 +17,15 @@ class LoginLogout extends Zend_Controller_Plugin_Abstract {
     		$controller		= 'logout';
     		$text			= 'Logout';
     	}
+    	$cur_ctrl = $request->getControllerName();
+    	if ($cur_ctrl == 'login')
+    		$aclass=' class="active"';
+    	else
+    		$aclass='';
+
     	$view = Zend_Registry::get('view');
     	$view->topNav('<a href="' .
     		$view->url(array('controller' => $controller), 'default', true) .
-    		'">' . I18n::_($text) . '</a>', Zend_View_Helper_Placeholder_Container_Abstract::SET, 1000);
+    		'"' . $aclass . '>' . I18n::_($text) . '</a>', Zend_View_Helper_Placeholder_Container_Abstract::SET, 1000);
 	}
 }
