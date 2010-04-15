@@ -223,8 +223,7 @@ class LoginController extends Zend_Controller_Action
 				 ->addFilter('StringToLower')
 				 ->setLabel(I18n::_('User Name'));
 		$password = new Zend_Form_Element_Password('login_password');
-		$password->addValidator(new Zend_Validate_Alnum())
-				 ->addValidator(new Zend_Validate_StringLength(8,20))
+		$password->addValidator(new Zend_Validate_StringLength(8,20))
 				 ->setRequired(true)
 				 ->setLabel(I18n::_('Password'));
 		$submit = new Zend_Form_Element_Submit('submit');
