@@ -7,4 +7,4 @@ $this->headLink()->appendStylesheet('/css/mail.css');
 ?>
 <H1><?php print I18n::_('Read Mail'); ?></H1>
 <?php
-print_r($this->mail_body);
+print nl2br($this->mail_body);
