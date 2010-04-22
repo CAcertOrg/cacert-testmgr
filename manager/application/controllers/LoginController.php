@@ -218,14 +218,14 @@ class LoginController extends Zend_Controller_Action
 		$al->setDefaultTranslator(I18n::getTranslate());
 		$al->setDisableTranslator(false);
 		$username = new Zend_Form_Element_Text('login_name');
-		$username->addValidator(new Zend_Validate_StringLength(2,20))
-				 ->setRequired(true)
-				 ->addFilter('StringToLower')
-				 ->setLabel(I18n::_('User Name'));
+		$username->setRequired(true)
+				 ->setLabel(I18n::_('User Name'))
+				 ->addFilter(new Zend_Filter_StringTrim())
+				 ->addFilter(new Zend_Filter_StripTags());
 		$password = new Zend_Form_Element_Password('login_password');
-		$password->addValidator(new Zend_Validate_StringLength(8,20))
-				 ->setRequired(true)
-				 ->setLabel(I18n::_('Password'));
+		$password->setRequired(true)
+				 ->setLabel(I18n::_('Password'))
+				 ->addFilter(new Zend_Filter_StringTrim());
 		$submit = new Zend_Form_Element_Submit('submit');
 		$submit->setLabel(I18n::_('Login'));
 		$form->addElement($username)
