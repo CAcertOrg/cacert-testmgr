@@ -61,7 +61,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `system_config` WRITE;
 /*!40000 ALTER TABLE `system_config` DISABLE KEYS */;
-INSERT INTO `system_config` VALUES (588,'log.file.name','/tmp/ca_mgr.log'),(589,'log.file.enabled','0'),(590,'log.syslog.facility','128'),(591,'log.syslog.enabled','1'),(592,'log.priority','7');
+INSERT INTO `system_config` VALUES (588,'log.file.name','/tmp/ca_mgr.log'),(589,'log.file.enabled','0'),(590,'log.syslog.facility','128'),(591,'log.syslog.enabled','1'),(592,'log.priority','7'),(624,'imap.port','143'),(623,'log.application','ca_mgr'),(622,'imap.use_tls','1'),(621,'imap.password','cacertmail'),(620,'imap.username','cacertmail'),(619,'imap.mailhost','localhost');
 /*!40000 ALTER TABLE `system_config` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -155,6 +155,7 @@ CREATE TABLE `system_user` (
   `id` bigint(20) NOT NULL auto_increment,
   `system_role_id` bigint(20) NOT NULL,
   `login` varchar(255) collate utf8_unicode_ci NOT NULL default '',
+  `user_client_crt_s_dn_i_dn` varchar(128) collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `fk_system_user_system_role1` (`system_role_id`),
   CONSTRAINT `fk_system_user_system_role1` FOREIGN KEY (`system_role_id`) REFERENCES `system_role` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -167,6 +168,7 @@ SET character_set_client = @saved_cs_client;
 
 LOCK TABLES `system_user` WRITE;
 /*!40000 ALTER TABLE `system_user` DISABLE KEYS */;
+INSERT INTO `system_user` VALUES (1,2,'cacert1@quarkus.de','/CN=Markus Warg/emailAddress=markus@cacert.org///O=CAcert Inc./OU=http://www.CAcert.org/CN=CAcert Class 3 Root');
 /*!40000 ALTER TABLE `system_user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
