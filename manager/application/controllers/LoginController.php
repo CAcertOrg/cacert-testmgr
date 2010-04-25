@@ -214,9 +214,6 @@ class LoginController extends Zend_Controller_Action
     	$form->setAction('/login/login')
 			 ->setMethod('post');
 		#$form->setAttrib('id', 'loginform');
-		$al = new Zend_Validate_Alnum();
-		$al->setDefaultTranslator(I18n::getTranslate());
-		$al->setDisableTranslator(false);
 		$username = new Zend_Form_Element_Text('login_name');
 		$username->setRequired(true)
 				 ->setLabel(I18n::_('User Name'))
