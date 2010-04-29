@@ -102,17 +102,16 @@ class AddPointsController extends Zend_Controller_Action
         
         
         // Fix the assurer flag
-        $where = array();
-        $query = '`users`.`id` = ?';
-        $where[] = $this->db->quoteInto($query, $user['id']);
-        $query = 'exists(select * from `cats_passed` as `cp`, ' .
-        	'`cats_variant` as `cv` where `cp`.`variant_id` = `cv`.`id` and ' .
-        	'`cv`.`type_id` = 1 and `cp`.`user_id` = ?';
-        $where[] = $this->db->quoteInto($query, $user['id']);
-        $query = '(select sum(`points`) from `notary` where `to`= ? and ' .
-        	'`expire` > now()) >= 100';
-        $where[] = $this->db->quoteInto($query, $user['id']);
-        $this->db->update('users', array('assurer' => 1), $where);
+        $query = 'UPDATE `users` SET `assurer` = 1 WHERE `users`.`id` = :user AND '.
+            
+            'EXISTS(SELECT * FROM `cats_passed` AS `cp`, `cats_variant` AS `cv` '.
+            'WHERE `cp`.`variant_id` = `cv`.`id` AND `cv`.`type_id` = 1 AND '.
+            '`cp`.`user_id` = :user) AND '.
+            
+		    '(SELECT SUM(`points`) FROM `notary` WHERE `to` = :user AND '.
+		    '`expire` < now()) >= 100';
+        $query_params['user'] = $user['id'];
+        $this->db->query($query, $query_params);
         
         return;
     }
