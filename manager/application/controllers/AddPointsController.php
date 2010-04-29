@@ -90,17 +90,17 @@ class AddPointsController extends Zend_Controller_Action
         $points = $values['quantity'];
         do {
             // split up into multiple assurances
-            if ($points > MAX_POINTS_PER_ASSURANCE) {
-                $assurance['awarded'] = MAX_POINTS_PER_ASSURANCE;
-                $points -= MAX_POINTS_PER_ASSURANCE;
+            if ($points > self::MAX_POINTS_PER_ASSURANCE) {
+                $assurance['awarded'] = self::MAX_POINTS_PER_ASSURANCE;
+                $points -= self::MAX_POINTS_PER_ASSURANCE;
             } else {
                 $assurance['awarded'] = $points;
                 $points = 0;
             }
             
             // only assign points whithin the limit
-            if ($user['points'] + $assurance['awarded'] > MAX_ASSURANCE_POINTS){
-                $assurance['points'] = MAX_ASSURANCE_POINTS - $user['points'];
+            if ($user['points'] + $assurance['awarded'] > self::MAX_ASSURANCE_POINTS){
+                $assurance['points'] = self::MAX_ASSURANCE_POINTS - $user['points'];
             } else {
                 $assurance['points'] = $assurance['awarded'];
             }
