@@ -57,10 +57,6 @@ class AddPointsController extends Zend_Controller_Action
         $user['id'] = $row['id'];
         
         
-        // Get the first assurer who didn't already assure the user
-        $assurer = $this->getNewAssurer($user['id']);
-        
-        
         // Get current points of the user
         $query = 'select sum(`points`) as `total` from `notary` where `to` = :user';
         $query_params['user'] = $user['id'];
@@ -71,7 +67,6 @@ class AddPointsController extends Zend_Controller_Action
         
         // Do the actual assurances
         $assurance = array(); // Make sure the array is empty
-        $assurance['from'] = $assurer;
         $assurance['to'] = $user['id'];
         $assurance['location'] = $values['location'];
         $assurance['date'] = $values['date'];
@@ -88,6 +83,9 @@ class AddPointsController extends Zend_Controller_Action
                 $assurance['awarded'] = $quantity;
                 $quantity = 0;
             }
+            
+            // Get the assurer for this assurance
+            $assurance['from'] = $this->getNewAssurer($user['id']);
             
             // only assign points whithin the limit
             if ($user['points'] + $assurance['awarded'] > self::MAX_ASSURANCE_POINTS){
