@@ -57,17 +57,8 @@ class AddPointsController extends Zend_Controller_Action
         $user['id'] = $row['id'];
         
         
-        // Get the first assurer who didn't already assure the user 
-        $query = 'select min(`id`) as `assurer` from `users` ' .
-        	'where `email` like \'john.doe-___@example.com\' and ' .
-            '`id` not in (select `from` from `notary` where `to` = :user)';
-        $query_params['user'] = $user['id'];
-        $row = $this->db->query($query, $query_params)->fetch();
-        if ($row['assurer'] === NULL) {
-            throw new Exception(__METHOD__ . ': no more assurers that haven\'t '.
-                'already assured this account');
-        }
-        $assurer = $row['assurer'];
+        // Get the first assurer who didn't already assure the user
+        $assurer = $this->getNewAssurer($user['id']);
         
         
         // Get current points of the user
@@ -87,15 +78,15 @@ class AddPointsController extends Zend_Controller_Action
         $assurance['when'] = new Zend_Db_Expr('now()');
         $this->view->assurancesDone = array();
         
-        $points = $values['quantity'];
+        $quantity = $values['quantity'];
         do {
             // split up into multiple assurances
-            if ($points > self::MAX_POINTS_PER_ASSURANCE) {
+            if ($quantity > self::MAX_POINTS_PER_ASSURANCE) {
                 $assurance['awarded'] = self::MAX_POINTS_PER_ASSURANCE;
-                $points -= self::MAX_POINTS_PER_ASSURANCE;
+                $quantity -= self::MAX_POINTS_PER_ASSURANCE;
             } else {
-                $assurance['awarded'] = $points;
-                $points = 0;
+                $assurance['awarded'] = $quantity;
+                $quantity = 0;
             }
             
             // only assign points whithin the limit
@@ -109,7 +100,7 @@ class AddPointsController extends Zend_Controller_Action
             
             $user['points'] += $assurance['points'];
             $this->view->assurancesDone[] = $assurance['points'];
-        } while ($points > 0);
+        } while ($quantity > 0);
         
         
         // Fix the assurer flag
@@ -127,6 +118,28 @@ class AddPointsController extends Zend_Controller_Action
         $this->db->update('users', array('assurer' => 1), $where);
         
         return;
+    }
+    
+    /**
+     * Get the first assurer who didn't already assure the user
+     * 
+     * @param int $user_id The ID of the user who should get assured
+     * @return int The ID of the selected assurer
+     */
+    protected function getNewAssurer($user_id)
+    {
+        $query = 'select min(`id`) as `assurer` from `users` ' .
+        	'where `email` like \'john.doe-___@example.com\' and ' .
+            '`id` not in (select `from` from `notary` where `to` = :user)';
+        $query_params['user'] = $user_id;
+        $row = $this->db->query($query, $query_params)->fetch();
+        
+        if ($row['assurer'] === NULL) {
+            throw new Exception(__METHOD__ . ': no more assurers that haven\'t '.
+                'already assured this account');
+        }
+        
+        return $row['assurer'];
     }
     
     protected function getAssuranceForm()
