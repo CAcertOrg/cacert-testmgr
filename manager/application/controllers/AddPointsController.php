@@ -153,7 +153,7 @@ class AddPointsController extends Zend_Controller_Action
         $location = new Zend_Form_Element_Text('location');
         $location->setRequired(true)
                 ->setLabel(I18n::_('Location'))
-                ->setValue(I18n::_('CACert Test Manager'))
+                ->setValue(I18n::_('CAcert Test Manager'))
                 ->addValidator(new Zend_Validate_StringLength(1,255));
         $form->addElement($location);
         
