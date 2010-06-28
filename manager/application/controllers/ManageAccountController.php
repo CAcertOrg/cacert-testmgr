@@ -137,7 +137,7 @@ class ManageAccountController extends Zend_Controller_Action
     protected function getAssuranceForm()
     {
         $form = new Zend_Form();
-        $form->setAction('/add-points/assurance')->setMethod('post');
+        $form->setAction('/manage-account/assurance')->setMethod('post');
         
         $quantity = new Zend_Form_Element_Text('quantity');
         $quantity->setRequired(true)
