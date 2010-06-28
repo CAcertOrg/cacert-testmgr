@@ -166,4 +166,46 @@ class ManageAccountController extends Zend_Controller_Action
         
         return $form;
     }
+    
+    protected function getAdminIncreaseForm()
+    {
+        $form = new Zend_Form();
+        $form->setAction('/manage-account/admin-increase')->setMethod('post');
+        
+        $quantity = new Zend_Form_Element_Text('quantity');
+        $quantity->setRequired(true)
+                ->setLabel(I18n::_('Number of Points'))
+                ->addFilter(new Zend_Filter_Int())
+                ->addValidator(new Zend_Validate_GreaterThan(0));
+        $form->addElement($quantity);
+        
+        $fragment = new Zend_Form_Element_Checkbox('fragment');
+        $fragment->setLabel(I18n::_('Split into 2-Point Fragments'))
+                ->setChecked(true);
+        $form->addElement($fragment);
+        
+        $unlimited = new Zend_Form_Element_Checkbox('unlimited');
+        $unlimited->setLabel(I18n::_('Assign Points even if the Limit of 150 '.
+                        'is exceeded'))
+                ->setChecked(false);
+        $form->addElement($unlimited);
+        
+        $location = new Zend_Form_Element_Text('location');
+        $location->setRequired(true)
+                ->setLabel(I18n::_('Location'))
+                ->setValue(I18n::_('CAcert Test Manager'))
+                ->addValidator(new Zend_Validate_StringLength(1,255));
+        $form->addElement($location);
+        
+        $date = new Zend_Form_Element_Text('date');
+        $date->setRequired(true)
+            ->setLabel(I18n::_('Date of Increase'))
+            ->setValue(date('Y-m-d H:i:s'))
+            ->addValidator(new Zend_Validate_StringLength(1,255));
+        $form->addElement($date);
+        
+        $submit = new Zend_Form_Element_Submit('submit');
+        $submit->setLabel(I18n::_('Give Me Points'));
+        $form->addElement($submit);
+    }
 }
