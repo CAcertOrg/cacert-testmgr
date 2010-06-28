@@ -45,7 +45,7 @@ class Bootstrap extends Zend_Application_Bootstrap_Bootstrap {
 		Zend_Registry::set('view', $view);
 		$view->doctype('XHTML1_STRICT');
 		$view->addHelperPath(APPLICATION_PATH . '/views/helpers/');
-		$view->headTitle = I18n::_('CACert Test Manager');
+		$view->headTitle = I18n::_('CAcert Test Manager');
 	}
 
 	/**
