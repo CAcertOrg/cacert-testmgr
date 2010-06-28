@@ -2,7 +2,7 @@
 
 require_once (FWACTIONS_PATH . '/FWAction.php');
 
-class AddPoints extends FWAction {
+class ManageAccount extends FWAction {
 	/**
 	 * get a list of required permissions that are needed to access this action
 	 * @return array
@@ -32,7 +32,7 @@ class AddPoints extends FWAction {
 	 * @return string
 	 */
 	public static function getController() {
-		return 'add-points';
+		return 'manage-account';
 	}
 
 	/**
@@ -48,6 +48,6 @@ class AddPoints extends FWAction {
 	 * @return string
 	 */
 	public static function getMenuText() {
-		return 'Add Points';
+		return I18n::_('Manage Account');
 	}
 }

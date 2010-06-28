@@ -3,7 +3,7 @@
  * @author Michael Tänzer
  */
 
-class AddPointsController extends Zend_Controller_Action
+class ManageAccountController extends Zend_Controller_Action
 {
     const MAX_POINTS_PER_ASSURANCE = 35;
     const MAX_ASSURANCE_POINTS = 100;
