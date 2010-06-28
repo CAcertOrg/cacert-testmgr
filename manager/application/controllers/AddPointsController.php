@@ -21,21 +21,17 @@ class AddPointsController extends Zend_Controller_Action
     
     public function indexAction()
     {
-        $this->view->assurance_form = $this->getAssuranceForm();
-        $this->render('index');
+        // Just render the view
+        return;
     }
     
     public function assuranceAction()
     {
         // Validate form
-        if (!$this->getRequest()->isPost()) {
-            return $this->_forward('index');
-        }
-        
         $form = $this->getAssuranceForm();
-        if (!$form->isValid($_POST)) {
+        if (!$this->getRequest()->isPost() || !$form->isValid($_POST)) {
             $this->view->assurance_form = $form;
-            return $this->render('index');
+            return $this->render('assuranceform');
         }
         
         // Form is valid -> get values for processing
