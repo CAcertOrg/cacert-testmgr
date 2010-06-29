@@ -1,0 +1,19 @@
+<?php
+/**
+ * @author Michael Tänzer
+ * @todo Text
+ */
+?>
+
+<h1><?php print I18n::_('Points added successfully')?></h1>
+
+<table>
+    <thead>
+        <tr><th>#</th><th><?php print I18n::_('Number of points')?></th></tr>
+    </thead>
+    <tbody>
+        <?php foreach ($this->adminIncreasesDone as $i => $points) {
+            printf('<tr><td> %1$d </td><td> %2$d </td></tr>', $i, $points);
+        }?>
+    </tbody>
+</table>
