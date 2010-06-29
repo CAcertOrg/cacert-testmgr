@@ -37,28 +37,9 @@ class ManageAccountController extends Zend_Controller_Action
         // Form is valid -> get values for processing
         $values = $form->getValues();
         
-        
-        // Check identity of the user
-        $session = Zend_Registry::get('session');
-        if ($session->authdata['authed'] !== true) {
-            throw new Exception(__METHOD__ . ': you need to log in to use this feature');
-        }
-        $query = 'select `id` from `users` where `id` = :user';
-        $query_params['user'] = $session->authdata['authed_id'];
-        $result = $this->db->query($query, $query_params);
-        if ($result->rowCount() !== 1) {
-            throw new Exception(__METHOD__ . ': user ID not found in the data base');
-        }
-        $row = $result->fetch();
-        $user['id'] = $row['id'];
-        
-        
-        // Get current points of the user
-        $query = 'select sum(`points`) as `total` from `notary` where `to` = :user';
-        $query_params['user'] = $user['id'];
-        $row = $this->db->query($query, $query_params)->fetch();
-        if ($row['total'] === NULL) $row['total'] = 0;
-        $user['points'] = $row['total'];
+        // Get user data
+        $user['id'] = $this->getUserId();
+        $user['points'] = $this->getPoints($user['id']);
         
         
         // Do the actual assurances
@@ -97,19 +78,50 @@ class ManageAccountController extends Zend_Controller_Action
         } while ($quantity > 0);
         
         
-        // Fix the assurer flag
-        $query = 'UPDATE `users` SET `assurer` = 1 WHERE `users`.`id` = :user AND '.
-            
-            'EXISTS(SELECT * FROM `cats_passed` AS `cp`, `cats_variant` AS `cv` '.
-            'WHERE `cp`.`variant_id` = `cv`.`id` AND `cv`.`type_id` = 1 AND '.
-            '`cp`.`user_id` = :user) AND '.
-            
-		    '(SELECT SUM(`points`) FROM `notary` WHERE `to` = :user AND '.
-		    '`expire` < now()) >= 100';
-        $query_params['user'] = $user['id'];
-        $this->db->query($query, $query_params);
+        // Maybe user is now assurer
+        $this->fixAssurerFlag($user['id']);
         
         return;
+    }
+    
+    /**
+     * Get and check the user ID of the current user
+     * 
+     * @return int The ID of the current user
+     */
+    protected function getUserId()
+    {
+        $session = Zend_Registry::get('session');
+        if ($session->authdata['authed'] !== true) {
+            throw new Exception(__METHOD__ . ': you need to log in to use this feature');
+        }
+        
+        // Check if the ID is present on the test server
+        $query = 'select `id` from `users` where `id` = :user';
+        $query_params['user'] = $session->authdata['authed_id'];
+        $result = $this->db->query($query, $query_params);
+        if ($result->rowCount() !== 1) {
+            throw new Exception(__METHOD__ . ': user ID not found in the data base');
+        }
+        $row = $result->fetch();
+        
+        return $row['id'];
+    }
+    
+    /**
+     * Get current points of the user
+     * 
+     * @param int $user_id ID of the user
+     * @return int the amount of points the user currently has
+     */
+    protected function getPoints($user_id)
+    {
+        $query = 'select sum(`points`) as `total` from `notary` where `to` = :user';
+        $query_params['user'] = $user_id;
+        $row = $this->db->query($query, $query_params)->fetch();
+        if ($row['total'] === NULL) $row['total'] = 0;
+        
+        return $row['total'];
     }
     
     /**
@@ -132,6 +144,27 @@ class ManageAccountController extends Zend_Controller_Action
         }
         
         return $row['assurer'];
+    }
+    
+    /**
+     * Fix the assurer flag for the given user
+     * 
+     * @param $user_id ID of the user
+     */
+    protected function fixAssurerFlag($user_id)
+    {
+    	// TODO: unset flag if requirements are not met
+    	
+        $query = 'UPDATE `users` SET `assurer` = 1 WHERE `users`.`id` = :user AND '.
+            
+            'EXISTS(SELECT * FROM `cats_passed` AS `cp`, `cats_variant` AS `cv` '.
+            'WHERE `cp`.`variant_id` = `cv`.`id` AND `cv`.`type_id` = 1 AND '.
+            '`cp`.`user_id` = :user) AND '.
+            
+            '(SELECT SUM(`points`) FROM `notary` WHERE `to` = :user AND '.
+            '`expire` < now()) >= 100';
+        $query_params['user'] = $user_id;
+        $this->db->query($query, $query_params);
     }
     
     protected function getAssuranceForm()
