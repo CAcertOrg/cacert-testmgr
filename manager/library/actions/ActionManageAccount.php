@@ -48,6 +48,6 @@ class ManageAccount extends FWAction {
 	 * @return string
 	 */
 	public static function getMenuText() {
-		return I18n::_('Manage Account');
+		return 'Manage Account';
 	}
 }
