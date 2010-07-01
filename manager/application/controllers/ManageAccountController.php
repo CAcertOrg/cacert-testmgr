@@ -309,5 +309,7 @@ class ManageAccountController extends Zend_Controller_Action
         $submit = new Zend_Form_Element_Submit('submit');
         $submit->setLabel(I18n::_('Give Me Points'));
         $form->addElement($submit);
+        
+        return $form;
     }
 }
