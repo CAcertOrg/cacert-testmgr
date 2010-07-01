@@ -21,7 +21,21 @@ class ManageAccountController extends Zend_Controller_Action
             APPLICATION_ENV);
 
         $this->db = Zend_Db::factory($config->ca_mgr->db->auth->pdo,
-    	    $config->ca_mgr->db->auth);
+            $config->ca_mgr->db->auth);
+        
+        // Build the left navigation
+        $actions = array();
+        $actions['assurance'] = I18n::_('Automated Assurance');
+        $actions['admin-increase'] = I18n::_('Administrative Increase');
+        $actions['assurer-challenge'] = I18n::_('Assurer Challenge');
+        $url = array('controller' => 'manage-account');
+        foreach ($actions as $action => $label) {
+            $url['action'] = $action;
+            $link = '<a href="'.$this->view->url($url, 'default', true).'">'.
+                $label . '</a>';
+            $this->view->leftNav($link);
+    	}
+    	
     }
     
     public function indexAction()
