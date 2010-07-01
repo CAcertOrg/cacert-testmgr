@@ -153,6 +153,35 @@ class ManageAccountController extends Zend_Controller_Action
         return;
     }
     
+    
+    public function assurerChallengeAction()
+    {
+        // Validate form
+        $form = $this->getAssurerChallengeForm();
+        if (!$this->getRequest()->isPost() || !$form->isValid($_POST)) {
+            $this->view->assurer_challenge_form = $form;
+            return $this->render('assurer-challenge-form');
+        }
+        
+        // Form is valid -> get values for processing
+        $values = $form->getValues();
+        
+        // Get user data
+        $user['id'] = $this->getUserId();
+        
+        // Assign the assurer challenge
+        $challenge = array(); // Make sure the array is empty
+        $challenge['user_id'] = $user['id'];
+        $challenge['variant_id'] = $values['variant'];
+        $challenge['pass_date'] = date('Y-m-d H:i:s');
+        $this->db->insert('cats_passed', $challenge);
+        
+        // Maybe user is now assurer
+        $this->fixAssurerFlag($user['id']);
+        
+        return;
+    }
+    
     /**
      * Get and check the user ID of the current user
      * 
@@ -308,6 +337,29 @@ class ManageAccountController extends Zend_Controller_Action
         
         $submit = new Zend_Form_Element_Submit('submit');
         $submit->setLabel(I18n::_('Give Me Points'));
+        $form->addElement($submit);
+        
+        return $form;
+    }
+    
+    protected function getAssurerChallengeForm()
+    {
+        $form = new Zend_Form();
+        $form->setAction('/manage-account/assurer-challenge')
+            ->setMethod('post');
+        
+        $variant = new Zend_Form_Element_Select('variant');
+        $variant->setLabel(I18n::_('Variant'));
+        // Get the available variants from the database
+        $query = 'select `id`, `test_text` from `cats_variant`
+            where `type_id` = 1';
+        $options = $this->db->fetchPairs($query);
+        $variant->setOptions($options)
+            ->setRequired(true);
+        $form->addElement($variant);
+        
+        $submit = new Zend_Form_Element_Submit('submit');
+        $submit->setLabel(I18n::_('Challenge Me'));
         $form->addElement($submit);
         
         return $form;
