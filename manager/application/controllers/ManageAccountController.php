@@ -368,7 +368,7 @@ class ManageAccountController extends Zend_Controller_Action
         $query = 'select `id`, `test_text` from `cats_variant`
             where `type_id` = 1';
         $options = $this->db->fetchPairs($query);
-        $variant->setOptions($options)
+        $variant->setMultiOptions($options)
             ->setRequired(true);
         $form->addElement($variant);
         
