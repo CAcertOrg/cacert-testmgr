@@ -28,6 +28,7 @@ class ManageAccountController extends Zend_Controller_Action
         $actions['assurance'] = I18n::_('Automated Assurance');
         $actions['admin-increase'] = I18n::_('Administrative Increase');
         $actions['assurer-challenge'] = I18n::_('Assurer Challenge');
+        $actions['flags'] = I18n::_('Set Flags');
         $url = array('controller' => 'manage-account');
         foreach ($actions as $action => $label) {
             $url['action'] = $action;
@@ -192,6 +193,33 @@ class ManageAccountController extends Zend_Controller_Action
         
         // Maybe user is now assurer
         $this->fixAssurerFlag($user['id']);
+        
+        return;
+    }
+    
+    public function flagsAction()
+    {
+        // Get user data
+        $user['id'] = $this->getUserId();
+        
+        // Validate form
+        $form = $this->getFlagsForm($user['id']);
+        $this->view->flags_form = $form;
+        if (!$this->getRequest()->isPost() || !$form->isValid($_POST)) {
+            return;
+        }
+        
+        $flags = array('admin', 'codesign', 'orgadmin', 'ttpadmin', 'board',
+            'locadmin', 'locked', 'assurer_blocked');
+        $update = array(); // Make sure array is empty
+        foreach ($flags as $flag) {
+            if ($form->getElement($flag)->isChecked()) {
+                $update[$flag] = 1;
+            } else {
+                $update[$flag] = 0;
+            }
+        }
+        $this->db->update('users', $update, '`id` = '.$user['id']);
         
         return;
     }
@@ -374,6 +402,48 @@ class ManageAccountController extends Zend_Controller_Action
         
         $submit = new Zend_Form_Element_Submit('submit');
         $submit->setLabel(I18n::_('Challenge Me'));
+        $form->addElement($submit);
+        
+        return $form;
+    }
+    
+    protected function getFlagsForm($user_id)
+    {
+        $form = new Zend_Form();
+        $form->setAction('/manage-account/flags')
+            ->setMethod('post');
+        
+        // Get the current setting of the flags
+        $query = 'select `admin`, `codesign`, `orgadmin`, `ttpadmin`, `board`,
+            `tverify`, `locadmin`, `locked`, `assurer_blocked` from `users`
+            where `id` = :user';
+        $query_params['user'] = $user_id;
+        $result = $this->db->query($query, $query_params);
+        if ($result->rowCount() !== 1) {
+            throw new Exception(__METHOD__ . ': user ID not found in the data base');
+        }
+        $row = $result->fetch();
+        
+        // Add a checkbox for each flag
+        $labels = array();
+        $labels['admin']           = I18n::_('Support Engineer');
+        $labels['codesign']        = I18n::_('Code Signing');
+        $labels['orgadmin']        = I18n::_('Organisation Admin');
+        $labels['ttpadmin']        = I18n::_('TTP Admin');
+        $labels['board']           = I18n::_('Board Member');
+        $labels['locadmin']        = I18n::_('Location Admin');
+        $labels['locked']          = I18n::_('Lock Account');
+        $labels['assurer_blocked'] = I18n::_('Block Assurer');
+        
+        foreach ($labels as $flag => $label) {
+            $checkbox = new Zend_Form_Element_Checkbox($flag);
+            $checkbox->setLabel($label)
+                ->setChecked($row[$flag] === 1);
+            $form->addElement($checkbox);
+        }
+        
+        $submit = new Zend_Form_Element_Submit('submit');
+        $submit->setLabel(I18n::_('Save Flags'));
         $form->addElement($submit);
         
         return $form;
