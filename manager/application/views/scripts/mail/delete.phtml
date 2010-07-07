@@ -1,0 +1,12 @@
+<?php
+/**
+ * @author markus
+ * $Id: index.phtml 25 2009-12-02 15:43:21Z markus $
+ */
+$this->headLink()->appendStylesheet('/css/mail.css');
+$this->headScript()->appendFile('/js/mail_redirect.js');
+?>
+<H1><?php print I18n::_('Delete Mail'); ?></H1>
+<?php
+print $this->message;
+print '<input type="hidden" id="returnto" value="' . $this->returnto .  '">';
