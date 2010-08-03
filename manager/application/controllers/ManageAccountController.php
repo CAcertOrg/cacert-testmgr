@@ -91,6 +91,11 @@ class ManageAccountController extends Zend_Controller_Action
                 $assurance['points'] = $assurance['awarded'];
             }
             
+            // Only assign positive amounts
+            if ($assurance['points'] < 0){
+                $assurance['points'] = 0;
+            }
+            
             $this->db->insert('notary', $assurance);
             
             $user['points'] += $assurance['points'];
