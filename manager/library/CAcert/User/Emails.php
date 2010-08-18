@@ -49,9 +49,11 @@ class CAcert_User_Emails {
 			$row = $res->fetch(PDO::FETCH_ASSOC);
 
 			foreach ($variants as $variant) {
-				$emails[] = $variants . '@' . $row['domain'];
+				$emails[] = $variant . '@' . $row['domain'];
 			}
 		}
+
+        // Log::Log()->debug(__METHOD__ . ' addresses ' . implode(',', $emails));
 
 		return $emails;
 	}
