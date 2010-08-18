@@ -8,6 +8,11 @@ require_once(LIBRARY_PATH . '/imap/imapConnection.php');
 
 class MailController extends Zend_Controller_Action
 {
+	/**
+	 * list of email addresses associated with that account
+	 * @var array
+	 */
+	private $addresses = array();
 
     public function init()
     {
@@ -25,6 +30,11 @@ class MailController extends Zend_Controller_Action
 	    		$this->view->url(array('controller' => 'mail', 'action' => 'full'), 'default', true) .
 	    		'"' . (($action == 'full')?' class="active"':'') . '>' . I18n::_('View all Mails') . '</a>', Zend_View_Helper_Placeholder_Container_Abstract::SET, 2);
     	}
+
+    	$emails = new CAcert_User_Emails();
+
+    	$this->addresses = $emails->getEmailAddressesByLogin($session->authdata['authed_username']);
+
     }
 
     public function indexAction()
@@ -43,7 +53,7 @@ class MailController extends Zend_Controller_Action
         	$header = $imap->imapHeader($i+1);
 
         	// skip all emails that do not belong to the user
-        	if ($header->toaddress != $session->authdata['authed_username'])
+			if (!in_array($header->toaddress, $this->addresses))
 				continue;
 
         	$header->uid = $imap->imapUID($i+1);
@@ -114,7 +124,8 @@ class MailController extends Zend_Controller_Action
 			$header = $imap->imapFetchOverview($uid);
 
 			$session = Zend_Registry::get('session');
-			if ($session->authdata['authed_role'] != 'Admin' && $header->to != $session->authdata['authed_username']) {
+
+			if ($session->authdata['authed_role'] != 'Admin' && !in_array($header->to, $this->addresses)) {
 				$this->view->message = I18n::_('This message does not belong to you');
 			}
 			else {
