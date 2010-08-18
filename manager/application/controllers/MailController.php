@@ -17,6 +17,10 @@ class MailController extends Zend_Controller_Action
     public function init()
     {
         /* Initialize action controller here */
+    	$config = new Zend_Config_Ini(APPLICATION_PATH . '/configs/application.ini', APPLICATION_ENV);
+    	$db2 = Zend_Db::factory($config->ca_mgr->db->auth2->pdo, $config->ca_mgr->db->auth2);
+		Zend_Registry::set('auth2_dbc', $db2);
+
 		$session = Zend_Registry::get('session');
     	$auth = $session->authdata['authed_permissions'];
 
