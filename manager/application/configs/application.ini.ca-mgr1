@@ -1,0 +1,57 @@
+[production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+includePaths.library = LIBRARY_PATH
+bootstrap.path = APPLICATION_PATH "/Bootstrap.php"
+bootstrap.class = "Bootstrap"
+resources.frontController.controllerDirectory = APPLICATION_PATH "/controllers"
+resources.frontController.noViewRenderer = 0
+resources.frontController.noErrorHandler = 0
+resources.frontController.useDefaultControllerAlways = 0
+resources.layout.layoutPath = APPLICATION_PATH "/layouts/scripts"
+resources.view[] =
+autoloadernamespaces.0 = "CAcert_"
+
+; Database settings for Session DB
+ca_mgr.db.session.pdo				= "Pdo_Mysql"
+ca_mgr.db.session.autocleanup		= 1
+ca_mgr.db.session.host				= "localhost"
+ca_mgr.db.session.username			= "ca_mgr"
+ca_mgr.db.session.password			= "jsdfhsd47534hsdf7"
+ca_mgr.db.session.dbname			= "ca_mgr"
+
+; Database settings for Auth DB (CACert User Table)
+ca_mgr.db.auth.pdo					= "Pdo_Mysql"
+ca_mgr.db.auth.host					= "cacert1.it-sls.de"
+ca_mgr.db.auth.username				= "ca_mgr"
+ca_mgr.db.auth.password				= "6348Jhfge(3457H5Kse"
+ca_mgr.db.auth.dbname				= "cacert"
+ca_mgr.db.auth.tablename			= "users"
+
+; Database settings for Auth DB (Manager User Table)
+ca_mgr.db.auth2.pdo					= "Pdo_Mysql"
+ca_mgr.db.auth2.host				= "localhost"
+ca_mgr.db.auth2.username			= "ca_mgr"
+ca_mgr.db.auth2.password			= "jsdfhsd47534hsdf7"
+ca_mgr.db.auth2.dbname				= "ca_mgr"
+ca_mgr.db.auth2.tablename			= "system_user"
+
+; Database settings for Config DB (access to system_config and dnssecme data tables)
+ca_mgr.db.config.pdo				= "Pdo_Mysql"
+ca_mgr.db.config.host				= "localhost"
+ca_mgr.db.config.username			= "ca_mgr"
+ca_mgr.db.config.password			= "jsdfhsd47534hsdf7"
+ca_mgr.db.config.dbname				= "ca_mgr"
+
+; Application name for logger
+log.application						= "web"
+
+[staging : production]
+
+[testing : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1
+
+[development : production]
+phpSettings.display_startup_errors = 1
+phpSettings.display_errors = 1

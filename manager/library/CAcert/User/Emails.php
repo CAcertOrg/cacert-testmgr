@@ -1,8 +1,10 @@
 <?php
 
 class CAcert_User_Emails {
-	public function __construct() {
-		Log::Log()->debug(__METHOD__);
+    private $db = null;
+
+	public function __construct($db) {
+        $this->db = $db;
 	}
 
 	/**
@@ -11,7 +13,7 @@ class CAcert_User_Emails {
 	 * @return array
 	 */
 	public function getEmailAddressesByLogin($addr) {
-		$db = Zend_Registry::get('auth2_dbc');
+		$db = $this->db;
 
 		/**
 		 * find out user id by email address
@@ -51,7 +53,6 @@ class CAcert_User_Emails {
 			}
 		}
 
-		Log::Log()->debug(__METHOD__ . ' mail addresses ' . var_export($emails, true));
 		return $emails;
 	}
 }
