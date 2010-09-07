@@ -443,7 +443,7 @@ class ManageAccountController extends Zend_Controller_Action
         foreach ($labels as $flag => $label) {
             $checkbox = new Zend_Form_Element_Checkbox($flag);
             $checkbox->setLabel($label)
-                ->setChecked($row[$flag] === 1);
+                ->setChecked($row[$flag] === '1');
             $form->addElement($checkbox);
         }
         
