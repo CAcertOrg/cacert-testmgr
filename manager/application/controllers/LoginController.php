@@ -39,8 +39,10 @@ class LoginController extends Zend_Controller_Action
 	    		 ->setIdentityColumn('email')
 	    		 ->setCredentialColumn('password');
 
+            Log::Log()->info(__METHOD__ . ' authenticate ' . $this->getRequest()->getParam('login_name') . ' ' . sha1(utf8_decode($this->getRequest()->getParam('login_password'))));
+
 	    	$auth->setIdentity( $this->getRequest()->getParam('login_name'))
-	    	     ->setCredential( sha1($this->getRequest()->getParam('login_password')))
+	    	     ->setCredential( sha1(utf8_decode($this->getRequest()->getParam('login_password'))))
 	    	     ->setCredentialTreatment('?');
 
 	        $result = $auth->authenticate();
