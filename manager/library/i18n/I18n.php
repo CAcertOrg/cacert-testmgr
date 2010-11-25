@@ -26,7 +26,7 @@ class I18n {
 	protected function __construct() {
     	$options = array(
     		'log'				=> Log::Log(),
-    		'logUntranslated'	=> true
+    		'logUntranslated'	=> false
     	);
 
     	$locale = L10n::getInstance();
