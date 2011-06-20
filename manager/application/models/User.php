@@ -3,7 +3,7 @@
  * @author Michael Tänzer
  */
 
-class Application_Model_User {
+class Default_Model_User {
     protected $db;
     
     protected $id;
@@ -20,7 +20,7 @@ class Application_Model_User {
      * Get an user object for the given ID
      * 
      * @param $id int
-     * @return Application_Model_User
+     * @return Default_Model_User
      */
     public static function findById($id) {
         // Get database connection
@@ -40,13 +40,13 @@ class Application_Model_User {
         }
         $row = $result->fetch();
         
-        return new Application_Model_User($db, $row['id']);
+        return new Default_Model_User($db, $row['id']);
     }
     
     /**
      * Get an user object for the currently logged in user
      * 
-     * @return Application_Model_User
+     * @return Default_Model_User
      */
     public static function findCurrentUser() {
         $session = Zend_Registry::get('session');
@@ -61,7 +61,7 @@ class Application_Model_User {
     /**
      * Get the first assurer who didn't already assure the user
      * 
-     * @return Application_Model_User
+     * @return Default_Model_User
      */
     public function findNewAssurer()
     {
@@ -77,7 +77,7 @@ class Application_Model_User {
                 'assured this account');
         }
         
-        return new Application_Model_User($this->db, $row['assurer']);
+        return new Default_Model_User($this->db, $row['assurer']);
     }
     
     /**
@@ -174,7 +174,7 @@ class Application_Model_User {
     /**
      * Assure another user. Usual restrictions apply
      * 
-     * @param $assuree Application_Model_User
+     * @param $assuree Default_Model_User
      * @param $points int
      * @param $location string
      * @param $date string
@@ -184,7 +184,7 @@ class Application_Model_User {
      * 		The amount of points that have been issued (might be less than
      * 		$points)
      */
-    public function assure(Application_Model_User $assuree, $points, $location,
+    public function assure(Default_Model_User $assuree, $points, $location,
             $date) {
         // Sanitize inputs
         $points = intval($points);

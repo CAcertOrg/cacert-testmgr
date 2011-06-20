@@ -57,7 +57,7 @@ class ManageAccountController extends Zend_Controller_Action
         $values = $form->getValues();
         
         // Get the current user
-        $user = Application_Model_User::findCurrentUser();
+        $user = Default_Model_User::findCurrentUser();
         
         $this->view->assurancesDone = array();
         $quantity = $values['quantity'];
