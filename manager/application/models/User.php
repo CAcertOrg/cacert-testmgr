@@ -135,7 +135,7 @@ class Default_Model_User {
      */
     public function getAssurerStatus() {
         $query = 'SELECT 1 FROM `users` WHERE `users`.`id` = :user AND '.
-        	'`assurer_blocked` = 0 AND'.
+        	'`assurer_blocked` = 0 AND '.
             
         	'EXISTS(SELECT * FROM `cats_passed` AS `cp`, `cats_variant` AS `cv` '.
         	'WHERE `cp`.`variant_id` = `cv`.`id` AND `cv`.`type_id` = 1 AND '.
