@@ -6,7 +6,6 @@
 class ManageAccountController extends Zend_Controller_Action
 {
     const MAX_POINTS_PER_ASSURANCE = 35;
-    const MAX_ASSURANCE_POINTS = 100;
     const MAX_POINTS_TOTAL = 150;
     const ADMIN_INCREASE_FRAGMENT_SIZE = 2;
     
@@ -57,54 +56,27 @@ class ManageAccountController extends Zend_Controller_Action
         // Form is valid -> get values for processing
         $values = $form->getValues();
         
-        // Get user data
-        $user['id'] = $this->getUserId();
-        $user['points'] = $this->getPoints($user['id']);
+        // Get the current user
+        $user = Application_Model_User::findCurrentUser();
         
-        
-        // Do the actual assurances
-        $assurance = array(); // Make sure the array is empty
-        $assurance['to'] = $user['id'];
-        $assurance['location'] = $values['location'];
-        $assurance['date'] = $values['date'];
-        $assurance['when'] = new Zend_Db_Expr('now()');
         $this->view->assurancesDone = array();
-        
         $quantity = $values['quantity'];
         do {
             // split up into multiple assurances
             if ($quantity > self::MAX_POINTS_PER_ASSURANCE) {
-                $assurance['awarded'] = self::MAX_POINTS_PER_ASSURANCE;
+                $points = self::MAX_POINTS_PER_ASSURANCE;
                 $quantity -= self::MAX_POINTS_PER_ASSURANCE;
             } else {
-                $assurance['awarded'] = $quantity;
+                $points = $quantity;
                 $quantity = 0;
             }
             
             // Get the assurer for this assurance
-            $assurance['from'] = $this->getNewAssurer($user['id']);
+            $issued = $user->findNewAssurer()
+                ->assure($user, $points, $values['location'], $values['date']);
             
-            // only assign points whithin the limit
-            if ($user['points'] + $assurance['awarded'] > self::MAX_ASSURANCE_POINTS){
-                $assurance['points'] = self::MAX_ASSURANCE_POINTS - $user['points'];
-            } else {
-                $assurance['points'] = $assurance['awarded'];
-            }
-            
-            // Only assign positive amounts
-            if ($assurance['points'] < 0){
-                $assurance['points'] = 0;
-            }
-            
-            $this->db->insert('notary', $assurance);
-            
-            $user['points'] += $assurance['points'];
-            $this->view->assurancesDone[] = $assurance['points'];
+            $this->view->assurancesDone[] = $issued;
         } while ($quantity > 0);
-        
-        
-        // Maybe user is now assurer
-        $this->fixAssurerFlag($user['id']);
         
         return;
     }
@@ -227,89 +199,6 @@ class ManageAccountController extends Zend_Controller_Action
         $this->db->update('users', $update, '`id` = '.$user['id']);
         
         return;
-    }
-    
-    /**
-     * Get and check the user ID of the current user
-     * 
-     * @return int The ID of the current user
-     */
-    protected function getUserId()
-    {
-        $session = Zend_Registry::get('session');
-        if ($session->authdata['authed'] !== true) {
-            throw new Exception(__METHOD__ . ': you need to log in to use this feature');
-        }
-        
-        // Check if the ID is present on the test server
-        $query = 'select `id` from `users` where `id` = :user';
-        $query_params['user'] = $session->authdata['authed_id'];
-        $result = $this->db->query($query, $query_params);
-        if ($result->rowCount() !== 1) {
-            throw new Exception(__METHOD__ . ': user ID not found in the data base');
-        }
-        $row = $result->fetch();
-        
-        return $row['id'];
-    }
-    
-    /**
-     * Get current points of the user
-     * 
-     * @param int $user_id ID of the user
-     * @return int the amount of points the user currently has
-     */
-    protected function getPoints($user_id)
-    {
-        $query = 'select sum(`points`) as `total` from `notary` where `to` = :user';
-        $query_params['user'] = $user_id;
-        $row = $this->db->query($query, $query_params)->fetch();
-        if ($row['total'] === NULL) $row['total'] = 0;
-        
-        return $row['total'];
-    }
-    
-    /**
-     * Get the first assurer who didn't already assure the user
-     * 
-     * @param int $user_id The ID of the user who should get assured
-     * @return int The ID of the selected assurer
-     */
-    protected function getNewAssurer($user_id)
-    {
-        $query = 'select min(`id`) as `assurer` from `users` ' .
-        	'where `email` like \'john.doe-___@example.com\' and ' .
-            '`id` not in (select `from` from `notary` where `to` = :user)';
-        $query_params['user'] = $user_id;
-        $row = $this->db->query($query, $query_params)->fetch();
-        
-        if ($row['assurer'] === NULL) {
-            throw new Exception(__METHOD__ . ': no more assurers that haven\'t '.
-                'already assured this account');
-        }
-        
-        return $row['assurer'];
-    }
-    
-    /**
-     * Fix the assurer flag for the given user
-     * 
-     * @param $user_id ID of the user
-     */
-    protected function fixAssurerFlag($user_id)
-    {
-    	// TODO: unset flag if requirements are not met
-    	
-        $query = 'UPDATE `users` SET `assurer` = 1 WHERE `users`.`id` = :user AND '.
-            
-            'EXISTS(SELECT * FROM `cats_passed` AS `cp`, `cats_variant` AS `cv` '.
-            'WHERE `cp`.`variant_id` = `cv`.`id` AND `cv`.`type_id` = 1 AND '.
-            '`cp`.`user_id` = :user) AND '.
-            
-            '(SELECT SUM(`points`) FROM `notary` WHERE `to` = :user AND '.
-            '`expire` < now()) >= 100';
-        $query_params['user'] = $user_id;
-        $this->db->query($query, $query_params);
     }
     
     protected function getAssuranceForm()
