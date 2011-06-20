@@ -168,7 +168,16 @@ class Default_Model_User {
      */
     public function getAge() {
         $now = new Zend_Date();
-        return $now->sub($this->getDob())->toValue(Zend_Date::YEAR);
+        $dob = $this->getDob();
+        $age = $now->get(Zend_Date::YEAR) - $dob->get(Zend_Date::YEAR);
+        
+        // Did we have a happy birthday already this year?
+        $dob->setYear($now);
+        if ($dob->compare($now) > 0) {
+        	$age -= 1;
+        }
+        
+        return $age;
     }
     
     /**
