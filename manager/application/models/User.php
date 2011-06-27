@@ -274,22 +274,39 @@ class Default_Model_User {
                 $addpoints = 1;
             }
             
-            $increase = array();
-            $increase['from'] = $this->id;
-            $increase['to'] = $this->id;
-            $increase['points'] = $addpoints;
-            $increase['awarded'] = $addpoints;
-            $increase['location'] = $location;
-            $increase['date'] = $date;
-            $increase['method'] = 'Administrative Increase';
-            $increase['when'] = new Zend_Db_Expr('now()');
-            
-            $this->db->insert('notary', $increase);
-            $this->points += $addpoints;
-            // No need to fix assurer flag here
+            $this->adminIncrease($addpoints, $location, $date);
         }
         
         return $rounddown;
+    }
+    
+    /**
+     * Do an administrative increase
+     * 
+     * @param $points int
+     * @param $location string
+     * @param $date string
+     */
+    public function adminIncrease($points, $location, $date) {
+        //Sanitize inputs
+        $points = intval($points);
+        $location = stripslashes($location);
+        $date = stripslashes($date);
+        
+        $increase = array();
+        $increase['from'] = $this->id;
+        $increase['to'] = $this->id;
+        $increase['points'] = $points;
+        $increase['awarded'] = $points;
+        $increase['location'] = $location;
+        $increase['date'] = $date;
+        $increase['method'] = 'Administrative Increase';
+        $increase['when'] = new Zend_Db_Expr('now()');
+        
+        $this->db->insert('notary', $increase);
+        $this->points += $points;
+        
+        $this->fixAssurerFlag();
     }
     
     /**

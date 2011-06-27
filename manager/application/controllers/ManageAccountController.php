@@ -94,53 +94,34 @@ class ManageAccountController extends Zend_Controller_Action
         $values = $form->getValues();
         
         // Get user data
-        $user['id'] = $this->getUserId();
-        $user['points'] = $this->getPoints($user['id']);
+        $user = Default_Model_User::findCurrentUser();
         
-        
-        // Do the actual increase
-        $increase = array(); // Make sure the array is empty
-        $increase['from'] = $user['id'];
-        $increase['to'] = $user['id'];
-        $increase['location'] = $values['location'];
-        $increase['date'] = $values['date'];
-        $increase['method'] = self::ADMIN_INCREASE_METHOD;
-        $increase['when'] = new Zend_Db_Expr('now()');
         $this->view->adminIncreasesDone = array();
-        
         $quantity = $values['quantity'];
         do {
             // Split up into multiple increases if fragment flag is set
             if ($values['fragment'] == '1' &&
                     $quantity > self::ADMIN_INCREASE_FRAGMENT_SIZE) {
-                $increase['awarded'] = self::ADMIN_INCREASE_FRAGMENT_SIZE;
+                $points = self::ADMIN_INCREASE_FRAGMENT_SIZE;
                 $quantity -= self::ADMIN_INCREASE_FRAGMENT_SIZE;
             } else {
-                $increase['awarded'] = $quantity;
+                $points = $quantity;
                 $quantity = 0;
             }
             
             // Only assign points within the limit if unlimited flag is not set
             if ($values['unlimited'] != '1') {
-                if ($user['points'] >= self::MAX_POINTS_TOTAL) {
+                if ($user->getPoints() >= self::MAX_POINTS_TOTAL) {
                     // No more administrative increases should be done
                     break;
-                } elseif ($user['points'] + $increase['awarded'] > self::MAX_POINTS_TOTAL) {
-                    $increase['awarded'] = self::MAX_POINTS_TOTAL - $user['points'];
+                } elseif ($user->getPoints() + $points > self::MAX_POINTS_TOTAL) {
+                    $points = self::MAX_POINTS_TOTAL - $user->getPoints();
                 }
             }
             
-            // Admin increases always have `points` == `awarded`
-            $increase['points'] = $increase['awarded'];
-            
-            $this->db->insert('notary', $increase);
-            
-            $user['points'] += $increase['points'];
-            $this->view->adminIncreasesDone[] = $increase['points'];
+            $user->adminIncrease($points, $values['location'], $values['date']);
+            $this->view->adminIncreasesDone[] = $points;
         } while ($quantity > 0);
-        
-        // Maybe user is now assurer
-        $this->fixAssurerFlag($user['id']);
         
         return;
     }
