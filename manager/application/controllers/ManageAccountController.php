@@ -97,32 +97,21 @@ class ManageAccountController extends Zend_Controller_Action
         $user = Default_Model_User::findCurrentUser();
         
         $this->view->adminIncreasesDone = array();
-        $quantity = $values['quantity'];
-        do {
-            // Split up into multiple increases if fragment flag is set
-            if ($values['fragment'] == '1' &&
-                    $quantity > self::ADMIN_INCREASE_FRAGMENT_SIZE) {
-                $points = self::ADMIN_INCREASE_FRAGMENT_SIZE;
-                $quantity -= self::ADMIN_INCREASE_FRAGMENT_SIZE;
-            } else {
-                $points = $quantity;
-                $quantity = 0;
-            }
-            
-            // Only assign points within the limit if unlimited flag is not set
-            if ($values['unlimited'] != '1') {
-                if ($user->getPoints() >= self::MAX_POINTS_TOTAL) {
-                    // No more administrative increases should be done
-                    break;
-                } elseif ($user->getPoints() + $points > self::MAX_POINTS_TOTAL) {
-                    $points = self::MAX_POINTS_TOTAL - $user->getPoints();
-                }
-            }
-            
-            $user->adminIncrease($points, $values['location'], $values['date']);
-            $this->view->adminIncreasesDone[] = $points;
-        } while ($quantity > 0);
+        $points = $values['points'];
         
+        // Only assign points within the limit if unlimited flag is not set
+        if ($values['unlimited'] != '1') {
+            if ($user->getPoints() >= self::MAX_POINTS_TOTAL) {
+                // No more administrative increases should be done
+                return;
+            } elseif ($user->getPoints() + $points > self::MAX_POINTS_TOTAL) {
+                $points = self::MAX_POINTS_TOTAL - $user->getPoints();
+            }
+        }
+        
+        $user->adminIncrease($points, $values['location'], $values['date']);
+        $this->view->adminIncreasesDone[] = $points;
+    
         return;
     }
     
@@ -220,17 +209,12 @@ class ManageAccountController extends Zend_Controller_Action
         $form = new Zend_Form();
         $form->setAction('/manage-account/admin-increase')->setMethod('post');
         
-        $quantity = new Zend_Form_Element_Text('quantity');
-        $quantity->setRequired(true)
+        $points = new Zend_Form_Element_Text('points');
+        $points->setRequired(true)
                 ->setLabel(I18n::_('Number of Points'))
                 ->addFilter(new Zend_Filter_Int())
                 ->addValidator(new Zend_Validate_GreaterThan(0));
-        $form->addElement($quantity);
-        
-        $fragment = new Zend_Form_Element_Checkbox('fragment');
-        $fragment->setLabel(I18n::_('Split into 2-Point Fragments'))
-                ->setChecked(true);
-        $form->addElement($fragment);
+        $form->addElement($points);
         
         $unlimited = new Zend_Form_Element_Checkbox('unlimited');
         $unlimited->setLabel(I18n::_('Assign Points even if the Limit of 150 '.
