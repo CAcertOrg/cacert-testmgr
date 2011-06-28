@@ -333,4 +333,77 @@ class Default_Model_User {
         throw new Exception(
             __METHOD__ . ': '.$this->id.' We have reached unreachable code');
     }
+    
+    /**
+     * Get the challenge types that are available in the database
+     * 
+     * @param $db Zend_Db_Adapter_Abstract
+     * 	The database connection to use
+     * 
+     * @return array(int => string)
+     */
+    public static function getAvailableChallengeTypes(
+                Zend_Db_Adapter_Abstract $db) {
+        $query = 'select `id`, `type_text` from `cats_type`';
+        return $db->fetchPairs($query);
+    }
+    
+    /**
+     * Get the challenge variants for this type that are available in the
+     * database
+     * 
+     * @param $db Zend_Db_Adapter_Abstract
+     * 	The database connection to use
+     * @param $type int
+     *  The type of challenge you want to get the variants of
+     * 
+     * @return array(int => string)
+     */
+    public static function getAvailableChallengeVariants(
+                Zend_Db_Adapter_Abstract $db, $type) {
+        $query = 'select `id`, `test_text` from `cats_variant`
+            where `type_id` = :type';
+        $query_params['type'] = $type;
+        return $db->fetchPairs($query, $query_params);
+    }
+    
+    /**
+     * Assign the challenge to the user
+     * 
+     * @param $type int
+     * 	The type of the challenge, has to be one of the keys returned by
+     *  getAvailableChallengeTypes()
+     * @param $variant int
+     * 	The variant of the challenge, has to be one of the keys returned by
+     *  getAvailableChallengeVariants()
+     * @param $date Zend_Date
+     *  The date the challenge was passed, defaults to current time
+     */
+    public function assignChallenge($type, $variant, Zend_Date $date = null) {
+        $types = self::getAvailableChallengeTypes($this->db);
+        if (!isset($types[$type])) {
+            throw new Exception(
+                __METHOD__ . ': got wrong challenge type '.$type.' when '.
+                'assigning challenge to user '.$this->id);
+        }
+        
+        $variants = self::getAvailableChallengeVariants($this->db, $type);
+        if (!isset($variants[$variant])) {
+            throw new Exception(
+                __METHOD__ . ': got wrong challenge variant '.$variant.' when '.
+                'assigning challenge to user '.$this->id);
+        }
+        
+        if ($date === null) {
+            $date = new Zend_Date();
+        }
+        
+        $challenge = array();
+        $challenge['user_id'] = $this->id;
+        $challenge['variant_id'] = $variant;
+        $challenge['pass_date'] = $date->toString('Y-m-d H:i:s');
+        $this->db->insert('cats_passed', $challenge);
+        
+        $this->fixAssurerFlag();
+    }
 }

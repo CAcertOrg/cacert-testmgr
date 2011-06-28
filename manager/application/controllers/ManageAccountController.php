@@ -93,7 +93,7 @@ class ManageAccountController extends Zend_Controller_Action
         // Form is valid -> get values for processing
         $values = $form->getValues();
         
-        // Get user data
+        // Get current user
         $user = Default_Model_User::findCurrentUser();
         
         $this->view->adminIncreasesDone = array();
@@ -129,19 +129,9 @@ class ManageAccountController extends Zend_Controller_Action
         $values = $form->getValues();
         
         // Get user data
-        $user['id'] = $this->getUserId();
+        $user = Default_Model_User::findCurrentUser();
         
-        // Assign the assurer challenge
-        $challenge = array(); // Make sure the array is empty
-        $challenge['user_id'] = $user['id'];
-        $challenge['variant_id'] = $values['variant'];
-        $challenge['pass_date'] = date('Y-m-d H:i:s');
-        $this->db->insert('cats_passed', $challenge);
-        
-        // Maybe user is now assurer
-        $this->fixAssurerFlag($user['id']);
-        
-        return;
+        $user->assignChallenge(1, $values['variant']);
     }
     
     public function flagsAction()
@@ -251,10 +241,8 @@ class ManageAccountController extends Zend_Controller_Action
         
         $variant = new Zend_Form_Element_Select('variant');
         $variant->setLabel(I18n::_('Variant'));
-        // Get the available variants from the database
-        $query = 'select `id`, `test_text` from `cats_variant`
-            where `type_id` = 1';
-        $options = $this->db->fetchPairs($query);
+        $options =
+            Default_Model_User::getAvailableChallengeVariants($this->db, 1);
         $variant->setMultiOptions($options)
             ->setRequired(true);
         $form->addElement($variant);
