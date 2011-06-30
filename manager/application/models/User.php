@@ -406,4 +406,70 @@ class Default_Model_User {
         
         $this->fixAssurerFlag();
     }
+    
+    /**
+     * Get the flags that are set
+     * 
+     * @return array (string => boolean)
+     */
+    public function getFlags() {
+        $flags = $this->db->select()->from('users', self::flags())
+            ->where('`id` = ?', $this->id)->query()->fetch();
+        
+        foreach ($flags as $key => $value) {
+            if ($value === '0') {
+                $flags[$key] = false;
+            } else {
+                $flags[$key] = true;
+            }
+        }
+        
+        return $flags;
+    }
+    
+    /**
+     * Set the flags - to know which flags exist you might want to call
+     * getFlags() first
+     * 
+     * @param $flags array (string => boolean)
+     * 	Currently unknown flags are silently ignored
+     */
+    public function setFlags(array $flags) {
+        $newflags = array();
+        
+        // filter values
+        foreach (self::flags() as $flag) {
+            if (isset($flags[$flag])) {
+                if ($flags[$flag]) {
+                    $newflags[$flag] = 1;
+                } else {
+                    $newflags[$flag] = 0;
+                }
+            }
+        }
+        
+        $where = $this->db->quoteInto('`id` = ?', $this->id, Zend_Db::INT_TYPE);
+        $this->db->update('users', $newflags, $where);
+    }
+    
+    /**
+     * The flags from the `users` table that might be set
+     */
+    private static function flags() {
+        return array(
+            'verified',
+            'listme',
+            'codesign',
+            '1024bit',
+            'admin',
+            'orgadmin',
+            'ttpadmin',
+            'adadmin',
+            'board',
+            'tverify',
+            'locadmin',
+            'locked',
+            'assurer',
+            'assurer_blocked');
+    }
 }

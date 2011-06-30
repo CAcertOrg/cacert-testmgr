@@ -136,28 +136,24 @@ class ManageAccountController extends Zend_Controller_Action
     
     public function flagsAction()
     {
-        // Get user data
-        $user['id'] = $this->getUserId();
+        $user = Default_Model_User::findCurrentUser();
         
         // Validate form
-        $form = $this->getFlagsForm($user['id']);
+        $form = $this->getFlagsForm($user);
         $this->view->flags_form = $form;
         if (!$this->getRequest()->isPost() || !$form->isValid($_POST)) {
             return;
         }
         
-        $flags = array('admin', 'codesign', 'orgadmin', 'ttpadmin', 'board',
-            'locadmin', 'locked', 'assurer_blocked');
-        $update = array(); // Make sure array is empty
-        foreach ($flags as $flag) {
-            if ($form->getElement($flag)->isChecked()) {
-                $update[$flag] = 1;
-            } else {
-                $update[$flag] = 0;
+        $flags = $user->getFlags();
+        foreach ($flags as $flag => $value) {
+            $element = $form->getElement($flag);
+            if ($element !== null) {
+                $flags[$flag] = $element->isChecked();
             }
         }
-        $this->db->update('users', $update, '`id` = '.$user['id']);
         
+        $user->setFlags($flags);
         return;
     }
     
@@ -254,22 +250,13 @@ class ManageAccountController extends Zend_Controller_Action
         return $form;
     }
     
-    protected function getFlagsForm($user_id)
+    protected function getFlagsForm(Default_Model_User $user)
     {
         $form = new Zend_Form();
         $form->setAction('/manage-account/flags')
             ->setMethod('post');
         
-        // Get the current setting of the flags
-        $query = 'select `admin`, `codesign`, `orgadmin`, `ttpadmin`, `board`,
-            `tverify`, `locadmin`, `locked`, `assurer_blocked` from `users`
-            where `id` = :user';
-        $query_params['user'] = $user_id;
-        $result = $this->db->query($query, $query_params);
-        if ($result->rowCount() !== 1) {
-            throw new Exception(__METHOD__ . ': user ID not found in the data base');
-        }
-        $row = $result->fetch();
+        $flags = $user->getFlags();
         
         // Add a checkbox for each flag
         $labels = array();
@@ -279,13 +266,14 @@ class ManageAccountController extends Zend_Controller_Action
         $labels['ttpadmin']        = I18n::_('TTP Admin');
         $labels['board']           = I18n::_('Board Member');
         $labels['locadmin']        = I18n::_('Location Admin');
+        $labels['tverify']         = I18n::_('TVerify');
         $labels['locked']          = I18n::_('Lock Account');
         $labels['assurer_blocked'] = I18n::_('Block Assurer');
         
         foreach ($labels as $flag => $label) {
             $checkbox = new Zend_Form_Element_Checkbox($flag);
             $checkbox->setLabel($label)
-                ->setChecked($row[$flag] === '1');
+                ->setChecked($flags[$flag]);
             $form->addElement($checkbox);
         }
         
