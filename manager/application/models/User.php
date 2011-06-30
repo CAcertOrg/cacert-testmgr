@@ -394,14 +394,14 @@ class Default_Model_User {
                 'assigning challenge to user '.$this->id);
         }
         
-        if ($date === null) {
-            $date = new Zend_Date();
-        }
-        
         $challenge = array();
         $challenge['user_id'] = $this->id;
         $challenge['variant_id'] = $variant;
-        $challenge['pass_date'] = $date->toString('Y-m-d H:i:s');
+        if ($date !== null) {
+            $challenge['pass_date'] = $date->toString('Y-m-d H:i:s');
+            // otherwise default value of the database will be used
+        }
+        
         $this->db->insert('cats_passed', $challenge);
         
         $this->fixAssurerFlag();
