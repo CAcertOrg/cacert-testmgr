@@ -25,6 +25,7 @@ class ManageAccountController extends Zend_Controller_Action
         // Build the left navigation
         $actions = array();
         $actions['assurance'] = I18n::_('Automated Assurance');
+        $actions['batch-assurance'] = I18n::_('Batch Assurance');
         $actions['admin-increase'] = I18n::_('Administrative Increase');
         $actions['assurer-challenge'] = I18n::_('Assurer Challenge');
         $actions['flags'] = I18n::_('Set Flags');
@@ -77,6 +78,45 @@ class ManageAccountController extends Zend_Controller_Action
             
             $this->view->assurancesDone[] = $issued;
         } while ($quantity > 0);
+        
+        return;
+    }
+    
+    public function batchAssuranceAction() {
+    	// Validate form
+        $form = $this->getBatchAssuranceForm();
+        if (!$this->getRequest()->isPost() || !$form->isValid($_POST)) {
+            $this->view->batch_assurance_form = $form;
+            return $this->render('batch-assurance-form');
+        }
+        
+        // Form is valid -> get values for processing
+        $values = $form->getValues();
+        
+        $user = Default_Model_User::findCurrentUser();
+        
+        $location = $values['location'];
+        $date = $values['date'];
+        
+        $this->view->assurances = array();
+        
+        for ($i = 0; $i < intval($values['quantity']); $i++) {
+            $assuree = $user->findNewAssuree();
+            
+            if ($values['percentage'] === 'percentage') {
+                $points = ($user->maxpoints() * intval($values['points']) /100);
+            }elseif ($values['percentage'] === 'absolute') {
+                $points = intval($values['points']);
+            }
+            
+            $user->assure($assuree, $points, $location, $date);
+            
+            $this->view->assurances[] = array(
+                    'assuree'=>$assuree->getPrimEmail(),
+                    'points'=>$points,
+                    'location'=>$location,
+                    'date'=>$date);
+        }
         
         return;
     }
@@ -185,6 +225,57 @@ class ManageAccountController extends Zend_Controller_Action
         
         $submit = new Zend_Form_Element_Submit('submit');
         $submit->setLabel(I18n::_('Assure Me'));
+        $form->addElement($submit);
+        
+        return $form;
+    }
+    
+    protected function getBatchAssuranceForm() {
+    	$form = new Zend_Form();
+        $form->setAction('/manage-account/batch-assurance')->setMethod('post');
+        
+        $quantity = new Zend_Form_Element_Text('quantity');
+        $quantity->setRequired(true)
+                ->setLabel(I18n::_('Number of Assurances'))
+                ->setValue('25')
+                ->addFilter(new Zend_Filter_Int())
+                ->addValidator(new Zend_Validate_Between(0, 100));
+        $form->addElement($quantity);
+        
+        $percentage = new Zend_Form_Element_Select('percentage');
+        $percentage->setRequired(true)
+                ->setLabel(I18n::_('Are the points specified absolute?'))
+                ->setValue('percentage')
+                ->setMultiOptions(array(
+                	    'percentage' => I18n::_('Percentage'),
+                        'absolute' => I18n::_('Absolute'),
+                    ));
+        $form->addElement($percentage);
+        
+        $points = new Zend_Form_Element_Text('points');
+        $points->setRequired(true)
+            ->setLabel(I18n::_('Points per Assurance'))
+            ->setValue('100')
+            ->addFilter(new Zend_Filter_Int())
+            ->addValidator(new Zend_Validate_Between(0, 100));
+        $form->addElement($points);
+        
+        $location = new Zend_Form_Element_Text('location');
+        $location->setRequired(true)
+                ->setLabel(I18n::_('Location'))
+                ->setValue(I18n::_('CAcert Test Manager Batch Assurance'))
+                ->addValidator(new Zend_Validate_StringLength(1,255));
+        $form->addElement($location);
+        
+        $date = new Zend_Form_Element_Text('date');
+        $date->setRequired(true)
+            ->setLabel(I18n::_('Date of Assurance'))
+            ->setValue(date('Y-m-d H:i:s'))
+            ->addValidator(new Zend_Validate_StringLength(1,255));
+        $form->addElement($date);
+        
+        $submit = new Zend_Form_Element_Submit('submit');
+        $submit->setLabel(I18n::_('Make Batch Assurance'));
         $form->addElement($submit);
         
         return $form;

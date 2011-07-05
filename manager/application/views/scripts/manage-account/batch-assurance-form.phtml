@@ -1,0 +1,28 @@
+<?php
+/**
+ * @author Michael Tänzer
+ */
+?>
+
+<h1><?php print I18n::_('Do Multiple Assurances at Once') ?></h1>
+
+<p><?php print I18n::_('Assure multiple dummy accounts in one step. '.
+	'The assurances look just like normal assurances and can be used to gain '.
+    'experience points without suffering from RSI (also known as mouse arm).')
+?></p>
+
+<p><?php print I18n::_('The amount of points given per Assurance can be '.
+	'specified in two ways:') ?></p>
+<dl>
+	<dt><?php print I18n::_('Percentage') ?></dt>
+	<dd><?php print I18n::_('n percent of the maximal possible points are '.
+		'given per Assurance. If it\'s not an integer it is rounded down to '.
+		'the next integer') ?></dd>
+	<dt><?php print I18n::_('Absolute') ?></dt>
+	<dd><?php print I18n::_('Exactly n points are given. If n exceeds the '.
+		'current maximum of points that may be given, it is set to the '.
+		'maximum until due to the gained experience points more points may be '.
+		'given') ?></dd>
+</dl>
+
+<?php print $this->batch_assurance_form ?>

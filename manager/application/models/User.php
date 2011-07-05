@@ -81,6 +81,27 @@ class Default_Model_User {
     }
     
     /**
+     * Get the first assuree who hasn't already been assured by this user
+     * 
+     * @return Default_Model_User
+     */
+    public function findNewAssuree() {
+        $query = 'select min(`id`) as `assuree` from `users` ' .
+        	'where `email` like \'john.doe-___@example.com\' and ' .
+            '`id` not in (select `to` from `notary` where `from` = :user)';
+        $query_params['user'] = $this->id;
+        $row = $this->db->query($query, $query_params)->fetch();
+        
+        if ($row['assuree'] === NULL) {
+            throw new Exception(
+                __METHOD__ . ': no more assurees that haven\'t already '.
+                'been assured by this account');
+        }
+        
+        return new Default_Model_User($this->db, $row['assuree']);
+    }
+    
+    /**
      * Refresh the current value of points from the test server
      * 
      * Needed if operations outside this class are made, that might affect the
@@ -178,6 +199,17 @@ class Default_Model_User {
         }
         
         return $age;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getPrimEmail() {
+        $query = 'select `email` from `users` where `id` = :user';
+        $query_params['user'] = $this->id;
+        $row = $this->db->query($query, $query_params)->fetch();
+        
+        return $row['email'];
     }
     
     /**
@@ -314,7 +346,7 @@ class Default_Model_User {
      * 
      * @return int
      */
-    private function maxpoints() {
+    public function maxpoints() {
         if (!$this->getAssurerStatus()) return 0;
         
         if ($this->getAge() < 18) return 10;

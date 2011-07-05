@@ -1,0 +1,28 @@
+<?php
+/**
+ * @author Michael Tänzer <neo@nhng.de>
+ */
+?>
+
+<h1><?php print I18n::_('Assurances executed successfully')?></h1>
+
+<p><?php print I18n::_('The following assurances were executed:')?></p>
+
+<table>
+	<thead>
+		<tr>
+			<th>#</th>
+			<th><?php print I18n::_('Assuree')?></th>
+			<th><?php print I18n::_('Number of points')?></th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach ($this->assurancesDone as $i => $assurance) {?>
+		    <tr>
+		    	<td><?php print $i ?></td>
+		    	<td><?php print $assurance['assuree'] ?></td>
+		    	<td><?php print $assurance['points'] ?></td>
+		    </tr>
+		<?php }?>
+	</tbody>
+</table>
