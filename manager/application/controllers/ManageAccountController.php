@@ -104,7 +104,7 @@ class ManageAccountController extends Zend_Controller_Action
             $assuree = $user->findNewAssuree();
             
             if ($values['percentage'] === 'percentage') {
-                $points = ($user->maxpoints() * intval($values['points']) /100);
+                $points = ($user->maxpoints() * intval($values['points'])) /100;
             }elseif ($values['percentage'] === 'absolute') {
                 $points = intval($values['points']);
             }
