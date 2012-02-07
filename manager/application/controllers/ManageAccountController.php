@@ -353,7 +353,7 @@ class ManageAccountController extends Zend_Controller_Action
         $labels = array();
         $labels['admin']           = I18n::_('Support Engineer');
         $labels['codesign']        = I18n::_('Code Signing');
-        $labels['orgadmin']        = I18n::_('Organisation Admin');
+        $labels['orgadmin']        = I18n::_('Organisation Assurer');
         $labels['ttpadmin']        = I18n::_('TTP Admin');
         $labels['board']           = I18n::_('Board Member');
         $labels['locadmin']        = I18n::_('Location Admin');
