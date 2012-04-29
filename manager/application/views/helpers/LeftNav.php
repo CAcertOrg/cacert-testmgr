@@ -78,7 +78,7 @@ class Zend_View_Helper_LeftNav extends Zend_View_Helper_Placeholder_Container_St
      * @param  string|null $locale
      * @return string
      */
-    public function __toString($indent = null, $locale = null)
+    public function toString($indent = null, $locale = null)
     {
 		$output = '';
     	$indent = (null !== $indent)
