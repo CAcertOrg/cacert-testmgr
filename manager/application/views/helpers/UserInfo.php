@@ -65,7 +65,7 @@ class Zend_View_Helper_UserInfo extends Zend_View_Helper_Placeholder_Container_S
      * @param  string|null $locale
      * @return string
      */
-    public function __toString($indent = null, $locale = null)
+    public function toString($indent = null, $locale = null)
     {
     	$session = Zend_Registry::get('session');
 		$this->items = $session->authdata;
