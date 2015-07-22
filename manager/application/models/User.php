@@ -297,18 +297,6 @@ class Default_Model_User {
         $this->db->insert('notary', $assurance);
         $assuree->points += $rounddown;
         $assuree->fixAssurerFlag();
-        
-        if ($this->getPoints() < 150) {
-            $addpoints = 0;
-            if ($this->getPoints() < 149 && $this->getPoints() >= 100) {
-                $addpoints = 2;
-            } elseif ($this->getPoints() === 149) {
-                $addpoints = 1;
-            }
-            
-            $this->adminIncrease($addpoints, $location, $date);
-        }
-        
         return $rounddown;
     }
     
