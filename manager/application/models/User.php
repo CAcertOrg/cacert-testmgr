@@ -108,8 +108,8 @@ class Default_Model_User {
      * user's points
      */
     public function refreshPoints() {
-        $query = 'select sum(`points`) as `total` from `notary` '.
-        	'where `to` = :user';
+        $query = "select sum(`points`) as `total` from `notary` " .
+        	"where `to` = :user and method != 'Administrative Increase' and from != to";
         $query_params['user'] = $this->id;
         $row = $this->db->query($query, $query_params)->fetch();
         if ($row['total'] === null) $row['total'] = 0;
@@ -297,18 +297,6 @@ class Default_Model_User {
         $this->db->insert('notary', $assurance);
         $assuree->points += $rounddown;
         $assuree->fixAssurerFlag();
-        
-        if ($this->getPoints() < 150) {
-            $addpoints = 0;
-            if ($this->getPoints() < 149 && $this->getPoints() >= 100) {
-                $addpoints = 2;
-            } elseif ($this->getPoints() === 149) {
-                $addpoints = 1;
-            }
-            
-            $this->adminIncrease($addpoints, $location, $date);
-        }
-        
         return $rounddown;
     }
     
